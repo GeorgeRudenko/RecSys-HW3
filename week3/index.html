@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Collaborative Filtering Movie Recommender</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="container">
+        <h1>Collaborative Filtering Movie Recommender</h1>
+        <p class="intro">Pick a user to get two Top-5 lists — one from <strong>User-Based CF</strong> (similar users) and one from <strong>Item-Based CF</strong> (similar movies). Add a movie to predict that user's rating both ways.</p>
+
+        <div class="controls">
+            <select id="user-select" aria-label="Select user">
+                <option value="" disabled selected>Select User</option>
+            </select>
+            <select id="movie-select" aria-label="Select movie">
+                <option value="" disabled selected>Select Movie</option>
+            </select>
+        </div>
+        <div class="buttons">
+            <button id="predict-btn" onclick="predictRating()" disabled>Predict Rating</button>
+            <button id="recommend-btn" onclick="getRecommendations()" disabled>Get Recommendations</button>
+        </div>
+
+        <p id="status" class="status">Loading MovieLens 100K...</p>
+
+        <div id="prediction-result" class="prediction-card" hidden></div>
+
+        <div id="result-box">
+            <div class="result-column">
+                <h2>User-Based CF — Top 5</h2>
+                <div id="user-based-result"><p>Please wait, loading data...</p></div>
+            </div>
+            <div class="result-column">
+                <h2>Item-Based CF — Top 5</h2>
+                <div id="item-based-result"><p>Please wait, loading data...</p></div>
+            </div>
+        </div>
+
+        <p class="footnote">Similarity: cosine on co-rated items, weighted by the number of co-rated items (min(n, 50) / 50). &#9733; = predicted rating on the 1–5 scale; lists are ranked by the evidence-weighted score &Sigma; sim &times; rating.</p>
+    </div>
+
+    <script src="data.js"></script>
+    <script src="script.js"></script>
+</body>
+</html>

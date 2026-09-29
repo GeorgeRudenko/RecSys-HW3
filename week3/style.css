@@ -1,0 +1,262 @@
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: 'Helvetica', 'Arial', sans-serif;
+    background-color: #f4f7f6;
+    color: #333;
+    line-height: 1.6;
+    padding: 20px;
+    display: flex;
+    justify-content: center;
+    align-items: flex-start;
+    min-height: 100vh;
+}
+
+.container {
+    background-color: white;
+    border-radius: 12px;
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+    padding: 32px;
+    width: 100%;
+    max-width: 920px;
+    margin-top: 20px;
+}
+
+h1 {
+    text-align: center;
+    margin-bottom: 12px;
+    color: #1f3a68;
+    font-size: 1.9rem;
+    line-height: 1.25;
+}
+
+.intro {
+    text-align: center;
+    margin: 0 auto 22px;
+    max-width: 640px;
+    color: #5f6b7a;
+}
+
+/* ---- controls ---------------------------------------------------------- */
+.controls {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 14px;
+    margin-bottom: 14px;
+}
+
+select {
+    width: 100%;
+    padding: 12px;
+    border: 1px solid #d5dbe3;
+    border-radius: 6px;
+    font-size: 15px;
+    background-color: #f9fafb;
+    color: #333;
+    transition: border-color 0.2s;
+}
+
+select:focus {
+    border-color: #1f73e0;
+    outline: none;
+}
+
+.buttons {
+    display: flex;
+    justify-content: center;
+    gap: 12px;
+    flex-wrap: wrap;
+}
+
+button {
+    padding: 12px 26px;
+    background-color: #1f73e0;
+    color: white;
+    border: 1px solid #1f73e0;
+    border-radius: 6px;
+    font-size: 16px;
+    font-weight: bold;
+    cursor: pointer;
+    transition: background-color 0.2s;
+}
+
+button:hover:not(:disabled) {
+    background-color: #155bb5;
+}
+
+#recommend-btn {
+    background-color: white;
+    color: #1f73e0;
+}
+
+#recommend-btn:hover:not(:disabled) {
+    background-color: #eaf2fd;
+}
+
+button:disabled {
+    opacity: 0.5;
+    cursor: wait;
+}
+
+.status {
+    text-align: center;
+    font-size: 0.85rem;
+    color: #8a94a3;
+    margin: 12px 0 18px;
+}
+
+.error {
+    color: #c0392b;
+}
+
+/* ---- prediction card (mirrors the assignment mock-up) ------------------ */
+.prediction-card {
+    background: #fff;
+    border: 1px solid #e3e8ef;
+    border-left: 5px solid #1f73e0;
+    border-radius: 8px;
+    box-shadow: 0 2px 8px rgba(31, 58, 104, 0.08);
+    padding: 18px 20px;
+    margin-bottom: 22px;
+}
+
+.prediction-title {
+    text-align: center;
+    font-weight: bold;
+    color: #1f3a68;
+    margin-bottom: 10px;
+}
+
+.prediction-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+}
+
+.prediction-cell {
+    text-align: center;
+    padding: 4px 10px;
+}
+
+.prediction-cell + .prediction-cell {
+    border-left: 1px solid #e3e8ef;
+}
+
+.prediction-label {
+    font-weight: bold;
+    color: #1f3a68;
+}
+
+.prediction-value {
+    font-size: 2.2rem;
+    font-weight: bold;
+    color: #1f3a68;
+    line-height: 1.2;
+}
+
+.prediction-sub {
+    color: #5f6b7a;
+}
+
+.prediction-evidence {
+    font-size: 0.8rem;
+    color: #8a94a3;
+}
+
+.note {
+    text-align: center;
+    font-size: 0.85rem;
+    color: #5f6b7a;
+    margin-top: 10px;
+}
+
+/* ---- Top-5 result columns ---------------------------------------------- */
+#result-box {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 16px;
+}
+
+.result-column {
+    background-color: #f5f8fc;
+    padding: 18px 20px;
+    border-radius: 8px;
+    border-left: 4px solid #1f73e0;
+}
+
+.result-column h2 {
+    font-size: 1.05rem;
+    color: #1f3a68;
+    margin-bottom: 8px;
+}
+
+.result-column p {
+    color: #2c3e50;
+    font-size: 0.92rem;
+}
+
+.rec-intro {
+    margin-bottom: 8px;
+}
+
+.result-column ol {
+    padding-left: 22px;
+}
+
+.result-column li {
+    margin-bottom: 8px;
+}
+
+.rec-title {
+    font-weight: bold;
+    color: #1f3a68;
+}
+
+.rec-score {
+    float: right;
+    color: #1f73e0;
+    font-weight: bold;
+    margin-left: 8px;
+}
+
+.rec-detail {
+    display: block;
+    font-size: 0.78rem;
+    color: #8a94a3;
+}
+
+.timing {
+    font-size: 0.75rem;
+    color: #8a94a3 !important;
+    margin-top: 6px;
+    text-align: right;
+}
+
+.footnote {
+    font-size: 0.75rem;
+    color: #8a94a3;
+    text-align: center;
+    margin-top: 20px;
+}
+
+@media (max-width: 640px) {
+    .container {
+        padding: 20px 16px;
+    }
+
+    .controls,
+    #result-box,
+    .prediction-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .prediction-cell + .prediction-cell {
+        border-left: none;
+        border-top: 1px solid #e3e8ef;
+        margin-top: 8px;
+        padding-top: 8px;
+    }
+}
