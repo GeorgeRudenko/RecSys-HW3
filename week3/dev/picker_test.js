@@ -40,6 +40,23 @@ let pass = 0, fail = 0; const ok = (c, m) => { c ? pass++ : fail++; console.log(
   await p.click('#predict-btn'); const pr = await p.textContent('#prediction-result');
   ok(/3\.9[\s\S]*4\.1/.test(pr), 'Predict Rating via pickers: user 1 + Toy Story -> 3.9 / 4.1');
   await p.click('#recommend-btn'); ok((await p.textContent('#user-based-result')).includes('Casablanca'), 'Get Recommendations via pickers works');
+  // clearing a choice
+  const clearBtn = n => `.picker[data-noun=${n}] .combo-clear`;
+  ok(await p.isVisible(clearBtn('movie')), 'clear (x) button visible while a movie is chosen');
+  await p.click(clearBtn('movie'));
+  ok(await val('movie-select') === '' && await val('movie-select-search') === '', 'x clears the movie: <select> back to placeholder, box empty');
+  await p.waitForTimeout(250);
+  ok(await val('movie-select-search') === '' && await val('movie-select') === '', 'the old movie does NOT come back after the field loses focus');
+  ok(await p.$eval('.picker[data-noun=movie] .picker-slider', e => e.value === '0' && e.classList.contains('unset')), 'movie slider reset and dimmed');
+  ok(await p.isHidden('#prediction-result'), 'stale prediction card hidden after clearing');
+  ok(!(await p.isVisible(clearBtn('movie'))), 'x hidden when nothing is chosen');
+  await p.click('#predict-btn'); ok((await p.textContent('#prediction-result')).includes('Please select both'), 'Predict with cleared movie -> "Please select both a user and a movie."');
+  await p.click('#user-select-search'); await p.keyboard.press('Backspace'); await p.click('h1'); await p.waitForTimeout(250);
+  ok(await val('user-select') === '' && await val('user-select-search') === '', 'emptying the user box and clicking away clears the user');
+  ok((await p.textContent('#user-based-result')).includes('Select a user'), 'Top-5 lists reset after clearing the user');
+  await p.click('#user-select-search'); await p.fill('#user-select-search', '1'); await p.keyboard.press('Enter');
+  await p.fill('#user-select-search', 'User 1'); await p.keyboard.press('Escape');
+  ok(await val('user-select') === '1', 'Esc after editing still keeps the choice (only x / empty box clears)');
   await p.click('#movie-select-search'); await p.fill('#movie-select-search', 'star');
   await p.screenshot({ path: 'shot_picker_desktop.png' });
   await p.keyboard.press('Escape');

@@ -97,6 +97,44 @@ select:focus {
     transition: border-color 0.2s;
 }
 
+.combo-input {
+    padding-right: 38px; /* room for the clear button */
+}
+
+/* hide the browser's own clear icon: it only erased the text */
+.combo-input::-webkit-search-cancel-button {
+    -webkit-appearance: none;
+    appearance: none;
+    display: none;
+}
+
+.combo-clear {
+    position: absolute;
+    top: 50%;
+    right: 6px;
+    transform: translateY(-50%);
+    width: 28px;
+    height: 28px;
+    padding: 0;
+    border: none;
+    border-radius: 50%;
+    background: transparent;
+    color: #8a94a3;
+    font-size: 20px;
+    font-weight: normal;
+    line-height: 28px;
+    text-align: center;
+}
+
+.combo-clear:hover:not(:disabled) {
+    background: #eef1f5;
+    color: #1f3a68;
+}
+
+.combo-clear[hidden] {
+    display: none;
+}
+
 .combo-input:focus {
     border-color: #1f73e0;
     background-color: #fff;
@@ -167,6 +205,10 @@ select:focus {
     align-items: center;
     gap: 10px;
     margin-top: 8px;
+}
+
+.picker-slider.unset {
+    opacity: 0.45;
 }
 
 .picker-slider {

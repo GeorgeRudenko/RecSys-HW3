@@ -20,10 +20,11 @@
                 <label class="picker-label" for="user-select-search">User</label>
                 <div class="combo">
                     <input type="search" id="user-select-search" class="combo-input" placeholder="Loading users..." autocomplete="off" disabled>
+                    <button type="button" class="combo-clear" aria-label="Clear user selection" title="Clear selection" hidden>&times;</button>
                     <ul class="combo-list" role="listbox" hidden></ul>
                 </div>
                 <div class="slider-row">
-                    <input type="range" class="picker-slider" aria-label="Slide through users" disabled>
+                    <input type="range" class="picker-slider unset" aria-label="Slide through users" disabled>
                     <span class="slider-value"></span>
                 </div>
                 <select id="user-select" class="native-select" aria-hidden="true" tabindex="-1">
@@ -34,10 +35,11 @@
                 <label class="picker-label" for="movie-select-search">Movie</label>
                 <div class="combo">
                     <input type="search" id="movie-select-search" class="combo-input" placeholder="Loading movies..." autocomplete="off" disabled>
+                    <button type="button" class="combo-clear" aria-label="Clear movie selection" title="Clear selection" hidden>&times;</button>
                     <ul class="combo-list" role="listbox" hidden></ul>
                 </div>
                 <div class="slider-row">
-                    <input type="range" class="picker-slider" aria-label="Slide through movies (A to Z)" disabled>
+                    <input type="range" class="picker-slider unset" aria-label="Slide through movies (A to Z)" disabled>
                     <span class="slider-value"></span>
                 </div>
                 <select id="movie-select" class="native-select" aria-hidden="true" tabindex="-1">

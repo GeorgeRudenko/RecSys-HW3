@@ -483,6 +483,7 @@ function predictRating() {
 //   * movies: type words from the title in any order ("wars star 1977");
 //     the slider walks the movies A to Z
 //   * keyboard: Up/Down to move, Enter to choose, Esc to cancel
+//   * the x button (or emptying the box and leaving it) clears the choice
 // ---------------------------------------------------------------------------
 function initPickers() {
     document.querySelectorAll('.picker').forEach(createPicker);
@@ -495,6 +496,7 @@ function createPicker(root) {
     const list = root.querySelector('.combo-list');
     const slider = root.querySelector('.picker-slider');
     const sliderValue = root.querySelector('.slider-value');
+    const clearButton = root.querySelector('.combo-clear');
 
     // Items in the <select>'s order (users by id, movies A-Z)
     const items = Array.from(select.options)
@@ -521,7 +523,8 @@ function createPicker(root) {
     input.placeholder = noun === 'user'
         ? `Search ${items.length} users by id, e.g. 42`
         : `Search ${items.length} movies by title, e.g. star wars`;
-    sliderValue.textContent = noun === 'user' ? 'slide to pick' : 'slide A → Z';
+    const sliderHint = noun === 'user' ? 'slide to pick' : 'slide A → Z';
+    sliderValue.textContent = sliderHint;
 
     function search(query) {
         const q = foldText(query.trim()).replace(/^user\s*/, '');
@@ -579,8 +582,32 @@ function createPicker(root) {
         select.dispatchEvent(new Event('change'));
         input.value = item.label;
         slider.value = item.index;
+        slider.classList.remove('unset');
         sliderValue.textContent = `${item.index + 1} / ${items.length}`;
         close();
+        updateClearButton();
+    }
+
+    // Back to "nothing selected": select, search box, slider and any result
+    // that was computed for the old choice
+    function clearSelection() {
+        const hadChoice = current !== null;
+        current = null;
+        select.value = '';
+        input.value = '';
+        slider.value = 0;
+        slider.classList.add('unset');
+        sliderValue.textContent = sliderHint;
+        close();
+        updateClearButton();
+        if (hadChoice) {
+            select.dispatchEvent(new Event('change'));
+            onSelectionCleared(noun);
+        }
+    }
+
+    function updateClearButton() {
+        clearButton.hidden = current === null && input.value === '';
     }
 
     function move(delta) {
@@ -606,7 +633,7 @@ function createPicker(root) {
     input.setAttribute('aria-autocomplete', 'list');
 
     input.addEventListener('focus', () => { input.select(); open(''); });
-    input.addEventListener('input', () => open(input.value));
+    input.addEventListener('input', () => { updateClearButton(); open(input.value); });
     input.addEventListener('keydown', e => {
         if (e.key === 'ArrowDown') { e.preventDefault(); move(1); }
         else if (e.key === 'ArrowUp') { e.preventDefault(); move(-1); }
@@ -620,8 +647,16 @@ function createPicker(root) {
         }
     });
     input.addEventListener('blur', () => {
-        setTimeout(() => { input.value = current ? current.label : ''; close(); }, 120);
+        setTimeout(() => {
+            if (input.value.trim() === '') { clearSelection(); return; } // emptied on purpose
+            input.value = current ? current.label : '';
+            close();
+            updateClearButton();
+        }, 120);
     });
+
+    clearButton.addEventListener('mousedown', e => e.preventDefault()); // keep focus logic simple
+    clearButton.addEventListener('click', () => { clearSelection(); input.blur(); });
 
     // mousedown (not click) so the input does not blur before the choice lands
     list.addEventListener('mousedown', e => {
@@ -631,6 +666,18 @@ function createPicker(root) {
     });
 
     slider.addEventListener('input', () => choose(items[parseInt(slider.value, 10)]));
+}
+
+// A cleared choice makes the shown results stale: hide / reset them
+function onSelectionCleared(noun) {
+    const card = document.getElementById('prediction-result');
+    card.hidden = true;
+    card.innerHTML = '';
+    if (noun === 'user') {
+        for (const id of ['user-based-result', 'item-based-result']) {
+            renderMessage(id, 'Select a user and click "Get Recommendations".');
+        }
+    }
 }
 
 function highlight(label, query) {

@@ -10,7 +10,7 @@ Run from this folder with Node.js >= 18 (no dependencies except Playwright for t
 | `proto_eval.js`, `proto_rank*.js` | offline experiments used to choose the missing-value strategy and ranking score |
 | `mf_and_centering.js` | matrix-factorisation and mean-centred kNN baselines |
 | `stats.js` | sparsity statistics of MovieLens 100K |
-| `picker_test.js` | 18 browser checks of the search + slider pickers (needs Playwright and `python -m http.server 8766` in `week3/`) |
+| `picker_test.js` | 28 browser checks of the search + slider pickers (incl. clearing a choice) (needs Playwright and `python -m http.server 8766` in `week3/`) |
 | `browser_test.js` | headless Chromium run (needs `npm i playwright` and `python -m http.server 8765` in `week3/`) |
 
 ```bash
