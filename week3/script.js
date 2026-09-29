@@ -46,6 +46,7 @@ window.onload = async function() {
 
         populateUserDropdown();
         populateMovieDropdown();
+        initPickers(); // search box + slider on top of the two <select>s
 
         itemSimCache = new Float32Array((numMovies + 1) * (numMovies + 1)).fill(NaN);
 
@@ -471,6 +472,181 @@ function predictRating() {
         ${actual !== 0
             ? `<p class="note">User ${userId} actually rated this movie <strong>${actual}</strong>. Both predictions were computed with that rating hidden (leave-one-out), so they can be compared with it.</p>`
             : `<p class="note">User ${userId} has not rated this movie yet.</p>`}`;
+}
+
+// ---------------------------------------------------------------------------
+// UI: pickers — choose a user / movie either by SEARCHING (type, then pick
+// from a scrollable list) or with a SLIDER. Each picker is a thin layer over
+// its hidden <select>: choosing anything just sets select.value, so
+// getRecommendations() and predictRating() are unchanged.
+//   * users: type an id ("42", "user 42"); ids starting with it are listed
+//   * movies: type words from the title in any order ("wars star 1977");
+//     the slider walks the movies A to Z
+//   * keyboard: Up/Down to move, Enter to choose, Esc to cancel
+// ---------------------------------------------------------------------------
+function initPickers() {
+    document.querySelectorAll('.picker').forEach(createPicker);
+}
+
+function createPicker(root) {
+    const select = document.getElementById(root.dataset.select);
+    const noun = root.dataset.noun;                  // "user" | "movie"
+    const input = root.querySelector('.combo-input');
+    const list = root.querySelector('.combo-list');
+    const slider = root.querySelector('.picker-slider');
+    const sliderValue = root.querySelector('.slider-value');
+
+    // Items in the <select>'s order (users by id, movies A-Z)
+    const items = Array.from(select.options)
+        .filter(o => o.value !== '')
+        .map((o, index) => {
+            const value = parseInt(o.value, 10);
+            return {
+                value,
+                index,
+                label: o.textContent,
+                key: noun === 'user' ? String(value) : foldText(movieById[value].title)
+            };
+        });
+
+    let matches = items;
+    let activeIndex = -1;   // highlighted row in `matches`
+    let current = null;     // chosen item
+
+    slider.min = 0;
+    slider.max = items.length - 1;
+    slider.value = 0;
+    slider.disabled = false;
+    input.disabled = false;
+    input.placeholder = noun === 'user'
+        ? `Search ${items.length} users by id, e.g. 42`
+        : `Search ${items.length} movies by title, e.g. star wars`;
+    sliderValue.textContent = noun === 'user' ? 'slide to pick' : 'slide A → Z';
+
+    function search(query) {
+        const q = foldText(query.trim()).replace(/^user\s*/, '');
+        if (q === '') return items;
+        if (noun === 'user') {
+            if (!/^\d+$/.test(q)) return [];
+            // exact id first, then ids that start with the typed digits
+            return items.filter(it => it.key.startsWith(q))
+                .sort((a, b) => (b.key === q) - (a.key === q) || a.value - b.value);
+        }
+        const tokens = q.split(/\s+/);
+        const rank = it => it.key.startsWith(q) ? 0 : new RegExp('\\b' + escapeRegExp(tokens[0])).test(it.key) ? 1 : 2;
+        return items.filter(it => tokens.every(t => it.key.includes(t)))
+            .map(it => ({ it, r: rank(it) }))
+            .sort((a, b) => a.r - b.r || a.it.index - b.it.index)
+            .map(x => x.it);
+    }
+
+    function render() {
+        const query = input.value.trim().toLowerCase().replace(/^user\s*/, '');
+        const userId = parseInt(document.getElementById('user-select').value, 10);
+        if (matches.length === 0) {
+            list.innerHTML = `<li class="combo-empty">No ${noun} matches "${escapeHtml(input.value)}"</li>`;
+        } else {
+            list.innerHTML = matches.map((it, i) => {
+                let badge = '';
+                if (noun === 'movie' && !isNaN(userId) && ratingMatrix[userId][it.value] !== 0) {
+                    badge = `<span class="combo-badge">User ${userId} rated ${ratingMatrix[userId][it.value]}&#9733;</span>`;
+                }
+                return `<li role="option" id="${select.id}-opt-${it.value}" data-i="${i}"
+                    class="${i === activeIndex ? 'active' : ''}${current && current.value === it.value ? ' chosen' : ''}"
+                    aria-selected="${i === activeIndex}"><span class="combo-text">${highlight(it.label, query)}</span>${badge}</li>`;
+            }).join('');
+        }
+        list.hidden = false;
+        input.setAttribute('aria-expanded', 'true');
+        scrollActiveIntoView();
+    }
+
+    function open(query) {
+        matches = search(query);
+        activeIndex = current ? Math.max(0, matches.indexOf(current)) : 0;
+        if (query !== '') activeIndex = 0;
+        render();
+    }
+
+    function close() {
+        list.hidden = true;
+        input.setAttribute('aria-expanded', 'false');
+    }
+
+    function choose(item) {
+        current = item;
+        select.value = String(item.value);
+        select.dispatchEvent(new Event('change'));
+        input.value = item.label;
+        slider.value = item.index;
+        sliderValue.textContent = `${item.index + 1} / ${items.length}`;
+        close();
+    }
+
+    function move(delta) {
+        if (list.hidden) { open(''); return; }
+        if (matches.length === 0) return;
+        activeIndex = (activeIndex + delta + matches.length) % matches.length;
+        list.querySelectorAll('li.active').forEach(li => li.classList.remove('active'));
+        const li = list.querySelector(`li[data-i="${activeIndex}"]`);
+        if (li) li.classList.add('active');
+        scrollActiveIntoView();
+    }
+
+    function scrollActiveIntoView() {
+        const li = list.querySelector(`li[data-i="${activeIndex}"]`);
+        if (li) {
+            li.scrollIntoView({ block: 'nearest' });
+            input.setAttribute('aria-activedescendant', li.id);
+        }
+    }
+
+    input.setAttribute('role', 'combobox');
+    input.setAttribute('aria-expanded', 'false');
+    input.setAttribute('aria-autocomplete', 'list');
+
+    input.addEventListener('focus', () => { input.select(); open(''); });
+    input.addEventListener('input', () => open(input.value));
+    input.addEventListener('keydown', e => {
+        if (e.key === 'ArrowDown') { e.preventDefault(); move(1); }
+        else if (e.key === 'ArrowUp') { e.preventDefault(); move(-1); }
+        else if (e.key === 'Enter') {
+            e.preventDefault();
+            if (!list.hidden && matches[activeIndex]) choose(matches[activeIndex]);
+        } else if (e.key === 'Escape') {
+            e.preventDefault(); // a type="search" input would clear itself
+            input.value = current ? current.label : '';
+            close();
+        }
+    });
+    input.addEventListener('blur', () => {
+        setTimeout(() => { input.value = current ? current.label : ''; close(); }, 120);
+    });
+
+    // mousedown (not click) so the input does not blur before the choice lands
+    list.addEventListener('mousedown', e => {
+        const li = e.target.closest('li[data-i]');
+        e.preventDefault();
+        if (li) choose(matches[parseInt(li.dataset.i, 10)]);
+    });
+
+    slider.addEventListener('input', () => choose(items[parseInt(slider.value, 10)]));
+}
+
+function highlight(label, query) {
+    const safe = escapeHtml(label);
+    const tokens = query.split(/\s+/).filter(t => t.length > 0).map(t => escapeRegExp(escapeHtml(t)));
+    if (tokens.length === 0) return safe;
+    return safe.replace(new RegExp('(' + tokens.join('|') + ')', 'gi'), '<mark>$1</mark>');
+}
+
+// Lower-case and strip accents, so "miserables" finds "Misérables"
+function foldText(text) {
+    return text.normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase();
+}
+
+function escapeRegExp(text) {
+    return text.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
 }
 
 // ---------------------------------------------------------------------------

@@ -8,10 +8,11 @@ function load(dir, files = ['data.js', 'script.js']) {
     addEventListener() {}, set disabled(v) { this._d = v; }, get disabled() { return this._d; } });
   const ctx = {
     console, Math, Number, Array, Float32Array, Float64Array, Uint8Array, Int32Array, Map, Set,
-    parseInt, parseFloat, isNaN, Error, Promise, performance, JSON,
+    parseInt, parseFloat, isNaN, Error, Promise, performance, JSON, TextDecoder,
     document: { getElementById: mkEl, createElement: () => ({ value: '', textContent: '' }) },
     fetch: async f => { const p = path.join(dir, f); if (!fs.existsSync(p)) return { ok: false, status: 404 };
-      const t = fs.readFileSync(p, 'utf8'); return { ok: true, status: 200, text: async () => t }; },
+      const buf = fs.readFileSync(p); return { ok: true, status: 200, text: async () => buf.toString('utf8'),
+      arrayBuffer: async () => buf.buffer.slice(buf.byteOffset, buf.byteOffset + buf.byteLength) }; },
     window: {},
   };
   vm.createContext(ctx);

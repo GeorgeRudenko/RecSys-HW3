@@ -40,7 +40,10 @@ async function loadData() {
         if (!moviesResponse.ok) {
             throw new Error(`Failed to load movie data: ${moviesResponse.status}`);
         }
-        const moviesText = await moviesResponse.text();
+        // u.item is Latin-1 encoded (e.g. "Misérables", "Á köldum klaka");
+        // response.text() would decode it as UTF-8 and show "Mis�rables".
+        const moviesBuffer = await moviesResponse.arrayBuffer();
+        const moviesText = new TextDecoder('iso-8859-1').decode(moviesBuffer);
         parseItemData(moviesText);
 
         // Load and parse rating data

@@ -11,13 +11,39 @@
         <h1>Collaborative Filtering Movie Recommender</h1>
         <p class="intro">Pick a user to get two Top-5 lists — one from <strong>User-Based CF</strong> (similar users) and one from <strong>Item-Based CF</strong> (similar movies). Add a movie to predict that user's rating both ways.</p>
 
+        <!-- Each picker = search box with a scrollable list + a slider.
+             The <select> elements required by the assignment stay in the DOM
+             (visually hidden) and remain the single source of truth that
+             getRecommendations() / predictRating() read from. -->
         <div class="controls">
-            <select id="user-select" aria-label="Select user">
-                <option value="" disabled selected>Select User</option>
-            </select>
-            <select id="movie-select" aria-label="Select movie">
-                <option value="" disabled selected>Select Movie</option>
-            </select>
+            <div class="picker" data-select="user-select" data-noun="user">
+                <label class="picker-label" for="user-select-search">User</label>
+                <div class="combo">
+                    <input type="search" id="user-select-search" class="combo-input" placeholder="Loading users..." autocomplete="off" disabled>
+                    <ul class="combo-list" role="listbox" hidden></ul>
+                </div>
+                <div class="slider-row">
+                    <input type="range" class="picker-slider" aria-label="Slide through users" disabled>
+                    <span class="slider-value"></span>
+                </div>
+                <select id="user-select" class="native-select" aria-hidden="true" tabindex="-1">
+                    <option value="" disabled selected>Select User</option>
+                </select>
+            </div>
+            <div class="picker" data-select="movie-select" data-noun="movie">
+                <label class="picker-label" for="movie-select-search">Movie</label>
+                <div class="combo">
+                    <input type="search" id="movie-select-search" class="combo-input" placeholder="Loading movies..." autocomplete="off" disabled>
+                    <ul class="combo-list" role="listbox" hidden></ul>
+                </div>
+                <div class="slider-row">
+                    <input type="range" class="picker-slider" aria-label="Slide through movies (A to Z)" disabled>
+                    <span class="slider-value"></span>
+                </div>
+                <select id="movie-select" class="native-select" aria-hidden="true" tabindex="-1">
+                    <option value="" disabled selected>Select Movie</option>
+                </select>
+            </div>
         </div>
         <div class="buttons">
             <button id="predict-btn" onclick="predictRating()" disabled>Predict Rating</button>

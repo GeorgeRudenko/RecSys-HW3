@@ -13,6 +13,7 @@ const ok = (cond, msg) => { if (cond) { pass++; console.log('  PASS', msg); } el
   let nz = 0; for (const row of R) for (const v of row) if (v) nz++; ok(nz === 100000, 'exactly 100000 non-zero cells (no duplicate pairs)');
   ok(JSON.stringify(g('movies')[0].genres) === JSON.stringify(['Animation', "Children's", 'Comedy']), 'Toy Story genres = Animation, Children\'s, Comedy (genre bug fixed)');
   ok(JSON.stringify(g('movies')[1].genres) === JSON.stringify(['Action', 'Adventure', 'Thriller']), 'GoldenEye genres = Action, Adventure, Thriller');
+  ok(g('movies').find(m => m.id === 1633).title === 'Á köldum klaka (Cold Fever) (1994)' && g('movies').find(m => m.id === 1203) !== undefined && g('movies').some(m => m.title === 'Misérables, Les (1995)'), 'Latin-1 titles decoded (Á köldum klaka, Misérables)');
   ok(c.els['user-select'].options.length === 943, '943 user options'); ok(c.els['movie-select'].options.length === 1682, '1682 movie options');
   console.log('cosineSimilarity');
   const cos = g('cosineSimilarity'); const S = g('CF_CONFIG').SHRINKAGE;
